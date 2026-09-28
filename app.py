@@ -1,9 +1,11 @@
 import os
+from pathlib import Path
 
 import streamlit as st
 from dotenv import load_dotenv
 
 from graph.workflow import run
+from tools.workspace import read_file
 
 load_dotenv()
 
@@ -35,6 +37,31 @@ def _show_architecture(result: dict) -> None:
         )
 
 
+def _show_code(result: dict) -> None:
+    project = Path(result["project_path"])
+    generated = result["generated_files"]
+    st.subheader("Coder")
+    st.markdown(f"**Workspace:** `{project}`")
+    st.markdown(f"**Status:** {len(generated)} file(s) written")
+    st.markdown("**Files**\n" + _bullets(
+        f"`{item['path']}` — {item['status']}" for item in generated
+    ))
+    for item in generated:
+        st.markdown(f"**{item['path']}**")
+        st.code(read_file(project, item["path"]), language=_language(item["path"]))
+
+
+def _language(path: str) -> str | None:
+    return {
+        ".html": "html",
+        ".css": "css",
+        ".js": "javascript",
+        ".py": "python",
+        ".json": "json",
+        ".md": "markdown",
+    }.get(Path(path).suffix.lower())
+
+
 st.set_page_config(page_title="Multi-Agent Coding Assistant")
 st.title("Multi-Agent Coding Assistant")
 
@@ -55,3 +82,4 @@ if st.button("Generate"):
             else:
                 _show_plan(result)
                 _show_architecture(result)
+                _show_code(result)

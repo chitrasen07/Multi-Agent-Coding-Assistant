@@ -1,6 +1,6 @@
 # Multi-Agent Coding Assistant
 
-An AI coding assistant that turns a software request into a plan and a project architecture. The Streamlit app sends the request through a LangGraph workflow: Planner, then Architect.
+An AI coding assistant that turns a software request into a plan, a project architecture, and source files. The Streamlit app runs a LangGraph workflow: Planner, Architect, then Coder. Generated projects are written to a temporary directory outside this repository.
 
 ## Current features
 
@@ -9,6 +9,7 @@ An AI coding assistant that turns a software request into a plan and a project a
 - `GROQ_API_KEY` loaded from the environment with python-dotenv
 - Planner agent: project type, features, technical requirements, and implementation steps
 - Architect agent: project name, folders, files, the purpose of each file, and a coding task for each file
+- Coder agent: writes each file into a temporary workspace and shows the file list, status, and code
 
 ## Installation
 

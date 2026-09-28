@@ -3,6 +3,7 @@ from typing import TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from agents.architect import architect
+from agents.coder import coder
 from agents.planner import planner
 
 
@@ -15,15 +16,19 @@ class AgentState(TypedDict, total=False):
     project_name: str
     folders: list[str]
     files: list[dict[str, str]]
+    project_path: str
+    generated_files: list[dict[str, str]]
 
 
 def build_workflow():
     graph = StateGraph(AgentState)
     graph.add_node("planner", planner)
     graph.add_node("architect", architect)
+    graph.add_node("coder", coder)
     graph.add_edge(START, "planner")
     graph.add_edge("planner", "architect")
-    graph.add_edge("architect", END)
+    graph.add_edge("architect", "coder")
+    graph.add_edge("coder", END)
     return graph.compile()
 
 
