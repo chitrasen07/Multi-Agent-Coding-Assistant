@@ -7,7 +7,10 @@ Respond with a JSON object only, using these keys:
 - features: array of strings
 - technical_requirements: array of strings
 - implementation_steps: array of strings, in order
-Do not include source code."""
+Do not include source code.
+technical_requirements must list only technologies the user asked for.
+Do not add a framework, bundler, or package manager unless the user requested it.
+HTML, CSS, and JavaScript alone describe a static page."""
 
 
 def planner(state: dict) -> dict:

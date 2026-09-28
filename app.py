@@ -35,7 +35,6 @@ def _language(path: str) -> str | None:
 def _generate(prompt: str) -> dict:
     result = run(prompt)
     project = Path(result["project_path"])
-    errors = validate_project(project, result["architecture"], result["plan"])
     files = []
     for item in result["generated_files"]:
         try:
@@ -44,6 +43,18 @@ def _generate(prompt: str) -> dict:
             content = ""
         files.append({"path": item["path"], "status": item["status"], "content": content})
 
+    if result.get("review", {}).get("status") != "PASS":
+        return {
+            "result": result,
+            "files": files,
+            "errors": [],
+            "zip_bytes": None,
+            "file_name": None,
+            "execution": None,
+            "status": "FAILED",
+        }
+
+    errors = validate_project(project, result["architecture"], result["plan"])
     if errors:
         return {
             "result": result,
@@ -52,6 +63,7 @@ def _generate(prompt: str) -> dict:
             "zip_bytes": None,
             "file_name": None,
             "execution": None,
+            "status": "FAILED",
         }
 
     zip_bytes = build_zip(project, [item["path"] for item in files])
@@ -70,6 +82,7 @@ def _generate(prompt: str) -> dict:
         "zip_bytes": zip_bytes,
         "file_name": file_name,
         "execution": execution,
+        "status": "PASSED",
     }
 
 
@@ -78,7 +91,9 @@ def _show_progress(project: dict) -> None:
     steps = ["Planner", "Architect", "Coder", "Reviewer"]
     for _ in range(result.get("fix_cycles", 0)):
         steps.extend(["Fixer", "Reviewer"])
-    if not project["errors"]:
+    if project.get("status") == "FAILED":
+        steps.append("FAILED")
+    elif not project["errors"]:
         steps.append("Final Project")
     st.subheader("Progress")
     st.markdown(" → ".join(steps))
@@ -140,11 +155,14 @@ def _show_project(project: dict) -> None:
     _show_plan(project["result"])
     _show_architecture(project["result"])
     _show_review(project["result"])
+    if project.get("status") == "FAILED" and not project["errors"]:
+        st.error("Review failed. The project was not packaged.")
     _show_fix(project["result"])
     _show_files(project["files"])
-    if project["errors"]:
-        st.error("Project validation failed.")
-        st.markdown(_bullets(project["errors"]))
+    if project.get("status") == "FAILED" or project["errors"]:
+        if project["errors"]:
+            st.error("Project validation failed. The project was not packaged.")
+            st.markdown(_bullets(project["errors"]))
         return
     st.download_button(
         "Download ZIP",
