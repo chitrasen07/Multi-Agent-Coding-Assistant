@@ -13,8 +13,10 @@ Do not include source code."""
 def planner(state: dict) -> dict:
     plan = chat_json(SYSTEM, state["user_request"])
     return {
-        "project_type": require_text(plan, "project_type"),
-        "features": require_texts(plan, "features"),
-        "technical_requirements": require_texts(plan, "technical_requirements"),
-        "implementation_steps": require_texts(plan, "implementation_steps"),
+        "plan": {
+            "project_type": require_text(plan, "project_type"),
+            "features": require_texts(plan, "features"),
+            "technical_requirements": require_texts(plan, "technical_requirements"),
+            "implementation_steps": require_texts(plan, "implementation_steps"),
+        }
     }

@@ -31,6 +31,18 @@ def read_file(project: Path, relative_path: str) -> str:
     return _inside(project, relative_path).read_text(encoding="utf-8")
 
 
+def cleanup_project(project: Path) -> None:
+    global _active
+    if _active is None:
+        return
+    root = Path(_active.name).resolve()
+    candidate = project.resolve()
+    if candidate != root and root not in candidate.parents:
+        raise ValueError("Refusing to clean a path outside the workspace.")
+    _active.cleanup()
+    _active = None
+
+
 def _project_name(name: str) -> str:
     cleaned = "".join(char if char.isalnum() or char in "-_" else "-" for char in name.strip())
     cleaned = cleaned.strip("-_.")

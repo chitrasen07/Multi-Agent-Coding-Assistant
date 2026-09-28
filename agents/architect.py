@@ -12,20 +12,16 @@ Each task is the coding work for that file. Do not write source code."""
 
 
 def architect(state: dict) -> dict:
-    plan = {
-        "project_type": state["project_type"],
-        "features": state["features"],
-        "technical_requirements": state["technical_requirements"],
-        "implementation_steps": state["implementation_steps"],
-    }
     design = chat_json(
         SYSTEM,
-        "Create the architecture for this plan:\n" + json.dumps(plan),
+        "Create the architecture for this plan:\n" + json.dumps(state["plan"]),
     )
     return {
-        "project_name": require_text(design, "project_name"),
-        "folders": _folders(design.get("folders")),
-        "files": _files(design.get("files")),
+        "architecture": {
+            "project_name": require_text(design, "project_name"),
+            "folders": _folders(design.get("folders")),
+            "files": _files(design.get("files")),
+        }
     }
 
 

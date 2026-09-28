@@ -9,10 +9,11 @@ Return only the file contents. Do not add markdown fences or explanation."""
 
 
 def coder(state: dict) -> dict:
-    project = create_project(state["project_name"])
-    create_folders(project, state["folders"])
+    architecture = state["architecture"]
+    project = create_project(architecture["project_name"])
+    create_folders(project, architecture["folders"])
     generated = []
-    for spec in state["files"]:
+    for spec in architecture["files"]:
         content = _source(chat_text(SYSTEM, _request(state, spec)))
         write_file(project, spec["path"], content)
         generated.append({"path": spec["path"], "status": "written"})
@@ -23,16 +24,11 @@ def coder(state: dict) -> dict:
 
 
 def _request(state: dict, spec: dict) -> str:
-    plan = {
-        "project_type": state["project_type"],
-        "features": state["features"],
-        "technical_requirements": state["technical_requirements"],
-        "implementation_steps": state["implementation_steps"],
-    }
-    others = [item["path"] for item in state["files"]]
+    architecture = state["architecture"]
+    others = [item["path"] for item in architecture["files"]]
     return (
-        f"Project: {state['project_name']}\n"
-        f"Plan:\n{json.dumps(plan)}\n"
+        f"Project: {architecture['project_name']}\n"
+        f"Plan:\n{json.dumps(state['plan'])}\n"
         f"File: {spec['path']}\n"
         f"Purpose: {spec['purpose']}\n"
         f"Task: {spec['task']}\n"
